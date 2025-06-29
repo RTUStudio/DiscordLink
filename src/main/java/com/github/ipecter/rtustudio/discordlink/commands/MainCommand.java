@@ -22,5 +22,6 @@ public class MainCommand extends RSCommand<DiscordLink> {
     public void reload(RSCommandData data) {
         syncConfig.reload();
         nameConfig.reload();
+        getPlugin().reloadProvider();
     }
 }

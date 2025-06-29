@@ -15,8 +15,11 @@ public class NameConfig extends RSConfiguration<DiscordLink> {
     }
 
     private void init() {
+        String typeStr = getString("type", "DISPLAY_NAME", """
+                Nick provider type. Available options: DISPLAY_NAME, CMI, ESSENTIALS
+                닉네임 제공자 타입. 지원 가능한 포멧: DISPLAY_NAME, CMI, ESSENTIALS""");
         try {
-            type = Type.valueOf(getString("type", "DISPLAY_NAME").toUpperCase());
+            type = Type.valueOf(typeStr.toUpperCase());
         } catch (Exception e) {
             type = Type.DISPLAY_NAME;
         }

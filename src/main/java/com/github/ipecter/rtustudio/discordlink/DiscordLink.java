@@ -29,7 +29,6 @@ public class DiscordLink extends RSPlugin {
     @Getter
     private LuckPerms luckPerms;
     @Getter
-    @Setter
     private NickProvider nickProvider;
 
     @Override
@@ -42,14 +41,7 @@ public class DiscordLink extends RSPlugin {
         syncConfig = new SyncConfig(this);
         nameConfig = new NameConfig(this);
 
-        switch (nameConfig.getType()) {
-            case ESSENTIALS -> nickProvider = new EssentialProvider(this);
-            case CMI -> nickProvider = new CMIProvider(this);
-            case DISPLAY_NAME -> nickProvider = new VanillaProvider(this);
-        }
-
-        console("Nick Provider: " + nameConfig.getType());
-        console("닉네임 제공자: " + nameConfig.getType());
+        reloadProvider();
 
         linkPlayerManager = new LinkPlayerManager(this);
 
@@ -59,5 +51,16 @@ public class DiscordLink extends RSPlugin {
 
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServer().getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) luckPerms = provider.getProvider();
+    }
+
+    public void reloadProvider() {
+        switch (nameConfig.getType()) {
+            case ESSENTIALS -> nickProvider = new EssentialProvider(this);
+            case CMI -> nickProvider = new CMIProvider(this);
+            case DISPLAY_NAME -> nickProvider = new VanillaProvider(this);
+        }
+
+        console("Nick Provider: " + nameConfig.getType());
+        console("닉네임 제공자: " + nameConfig.getType());
     }
 }
