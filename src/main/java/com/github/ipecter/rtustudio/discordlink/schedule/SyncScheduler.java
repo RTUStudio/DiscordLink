@@ -23,21 +23,17 @@ public class SyncScheduler implements Runnable {
 
     private final Player player;
 
-    private final User user;
     private final Member member;
 
     private final SyncConfig syncConfig;
     private final NickProvider nickProvider;
-    private final UserManager userManager;
 
     public SyncScheduler(DiscordLink plugin, Player player) {
         this.plugin = plugin;
         this.syncConfig = plugin.getSyncConfig();
         this.nickProvider = plugin.getNickProvider();
-        this.userManager = plugin.getLuckPerms().getUserManager();
         this.player = player;
         UUID uuid = player.getUniqueId();
-        this.user = userManager.getUser(uuid);
         DiscordSRV discordSRV = DiscordSRV.getPlugin();
         String id = discordSRV.getAccountLinkManager().getDiscordId(uuid);
         this.member = discordSRV.getMainGuild().getMemberById(id);
@@ -47,42 +43,9 @@ public class SyncScheduler implements Runnable {
     public void run() {
         List<String> roles = new ArrayList<>();
         UUID uuid = player.getUniqueId();
-        if (!member.getEffectiveName().equals(nickProvider.getName(uuid))) {
-            nickProvider.setName(uuid, member.getEffectiveName());
+        String nickname = member.getEffectiveName().replace(" ", syncConfig.getWhiteSpace());
+        if (!nickname.equals(nickProvider.getName(uuid))) {
+            nickProvider.setName(uuid, nickname);
         }
-        for (Role role : member.getRoles()) roles.add(role.getId());
-        boolean needSave = false;
-        for (Long id : syncConfig.getRoles().keySet()) {
-            String group = syncConfig.getRoles().get(id);
-            if (roles.contains(group)) {
-                if (!hasPermission(group)) {
-                    add(group);
-                    needSave = true;
-                }
-            } else {
-                if (hasPermission(group)) {
-                    remove(group);
-                    needSave = true;
-                }
-            }
-        }
-        if (needSave) save();
     }
-
-    private boolean hasPermission(String group) {
-        return player.hasPermission("group." + group);
-    }
-
-    private void add(String group) {
-        user.data().add(Node.builder("group." + group).build());
-    }
-
-    private void remove(String group) {
-        user.data().remove(Node.builder("group." + group).build());
-    }
-
-    private void save() {
-        userManager.saveUser(user);
-    }
-
 }
